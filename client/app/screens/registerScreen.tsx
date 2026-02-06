@@ -1,22 +1,18 @@
-
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
-  StatusBar,
-  Dimensions,
   ScrollView,
 } from "react-native";
-import { useRouter, Stack } from "expo-router"; 
+import { useRouter, Stack } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
-
-const { width, height } = Dimensions.get('window');
+import { StatusBar } from 'expo-status-bar';
+import Input from "../../components/Input";
+import Button from "../../components/Button";
 
 const RegisterScreen = () => {
   const [name, setName] = useState("");
@@ -27,11 +23,7 @@ const RegisterScreen = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
 
-  const handleFocus = useCallback((id: string) => setFocusedInput(id), []);
-  const handleBlur = useCallback(() => setFocusedInput(null), []);
-
   const handleRegister = () => {
-    // 1. Validation Logic
     if (!name || phoneNumber.length < 10 || password.length < 6) {
       Alert.alert("Attention", "Please fill all fields correctly.");
       return;
@@ -41,130 +33,115 @@ const RegisterScreen = () => {
       return;
     }
 
-    // 2. Success Logic: Alert dikhayenge aur phir Home Screen par bhejenge
     Alert.alert("Success", `Welcome ${name}! Account created successfully!`);
-    
-    // 3. Navigation with Params: Folder structure ke hisaab se path aur parameter pass kar rahe hain
+
     router.push({
-      pathname: "/screens/HomeScreen", 
-      params: { userName: name }       
+      pathname: "/screens/HomeScreen",
+      params: { userName: name }
     });
   };
 
   return (
-    <View style={styles.container}>
-      {}
+    <View className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-      
+      <StatusBar style="dark" translucent backgroundColor="transparent" />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+        className="flex-1"
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
+        <ScrollView
+          contentContainerClassName="flex-grow pt-[16vh]"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Yellow Design Section */}
-          <View style={styles.topCurve} />
+          <View className="absolute -top-[105%] self-center w-[180%] aspect-square rounded-[120%] bg-[#FFD700] -z-10" />
 
-          <View style={styles.inner}>
-            <View style={styles.textContainer}>
-              <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <View className="flex-1 px-8 pb-10">
+            <View className="mb-5 items-center relative">
+              <TouchableOpacity onPress={() => router.back()} className="absolute left-[-15px] -top-16 p-2.5 z-10">
                 <Ionicons name="arrow-back" size={24} color="#1E293B" />
               </TouchableOpacity>
 
-              <View style={styles.headerBox}>
-                 <Text style={styles.header}>Create{"\n"}<Text style={styles.brandName}>New Account</Text></Text>
-                 <View style={styles.accentBar} />
+              <View className="h-[120px] justify-center items-center w-full">
+                <Text className="text-[28px] font-black text-slate-900 text-center leading-8">
+                  Create{"\n"}<Text className="text-slate-800">New Account</Text>
+                </Text>
+                <View className="w-9 h-1 bg-slate-800 rounded-full mt-2" />
               </View>
 
-              <Text style={styles.subtitle}>Join Hello 11 for a premium experience</Text>
+              <Text className="text-sm text-slate-500 font-semibold text-center mt-2 mb-10">Join Hello 11 for a premium experience</Text>
             </View>
 
-            <View style={styles.formGroup}>
-                {/* Full Name Input */}
-                <View style={[styles.inputContainer, focusedInput === 'name' && styles.focusedBorder]}>
-                  <Ionicons name="person-outline" size={20} color="#94A3B8" style={styles.icon} />
-                  <TextInput
-                      style={styles.input}
-                      placeholder="Full Name"
-                      placeholderTextColor="#94A3B8"
-                      value={name}
-                      onChangeText={setName}
-                      onFocus={() => handleFocus('name')}
-                      onBlur={handleBlur}
-                  />
-                </View>
+            <View className="mb-3">
+              {/* Full Name Input */}
+              <Input
+                placeholder="Full Name"
+                value={name}
+                onChangeText={setName}
+                isFocused={focusedInput === 'name'}
+                onFocus={() => setFocusedInput('name')}
+                onBlur={() => setFocusedInput(null)}
+                icon={<Ionicons name="person-outline" size={20} color="#94A3B8" />}
+              />
 
-                {/* Mobile Number Input */}
-                <View style={[styles.inputContainer, focusedInput === 'phone' && styles.focusedBorder]}>
-                  <View style={styles.countryCodeBox}>
-                      <Text style={styles.countryCode}>+91</Text>
+              {/* Mobile Number Input */}
+              <Input
+                placeholder="Mobile Number"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                maxLength={10}
+                isFocused={focusedInput === 'phone'}
+                onFocus={() => setFocusedInput('phone')}
+                onBlur={() => setFocusedInput(null)}
+                icon={
+                  <View className="bg-[#FFD700] px-2.5 py-1.5 rounded-lg">
+                    <Text className="text-sm font-extrabold text-slate-800">+91</Text>
                   </View>
-                  <TextInput
-                      style={styles.input}
-                      placeholder="Mobile Number"
-                      placeholderTextColor="#94A3B8"
-                      keyboardType="phone-pad"
-                      value={phoneNumber}
-                      onChangeText={setPhoneNumber}
-                      maxLength={10}
-                      onFocus={() => handleFocus('phone')}
-                      onBlur={handleBlur}
-                  />
-                </View>
+                }
+              />
 
-                {/* Password Input */}
-                <View style={[styles.inputContainer, focusedInput === 'password' && styles.focusedBorder]}>
-                  <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" style={styles.icon} />
-                  <TextInput
-                      style={styles.input}
-                      placeholder="Create Password"
-                      placeholderTextColor="#94A3B8"
-                      secureTextEntry={!isPasswordVisible}
-                      value={password}
-                      onChangeText={setPassword}
-                      onFocus={() => handleFocus('password')}
-                      onBlur={handleBlur}
+              {/* Password Input */}
+              <Input
+                placeholder="Create Password"
+                secureTextEntry={!isPasswordVisible}
+                value={password}
+                onChangeText={setPassword}
+                isFocused={focusedInput === 'password'}
+                onFocus={() => setFocusedInput('password')}
+                onBlur={() => setFocusedInput(null)}
+                icon={<Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />}
+                rightIcon={
+                  <Ionicons
+                    name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color={focusedInput === 'password' ? "#1E293B" : "#94A3B8"}
                   />
-                  <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                    <Ionicons 
-                      name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} 
-                      size={20} 
-                      color={focusedInput === 'password' ? "#1E293B" : "#94A3B8"} 
-                    />
-                  </TouchableOpacity>
-                </View>
+                }
+                onRightIconPress={() => setIsPasswordVisible(!isPasswordVisible)}
+              />
 
-                {/* Confirm Password Input */}
-                <View style={[styles.inputContainer, focusedInput === 'confirm' && styles.focusedBorder]}>
-                  <Ionicons name="shield-checkmark-outline" size={20} color="#94A3B8" style={styles.icon} />
-                  <TextInput
-                      style={styles.input}
-                      placeholder="Confirm Password"
-                      placeholderTextColor="#94A3B8"
-                      secureTextEntry={!isPasswordVisible}
-                      value={confirmPassword}
-                      onChangeText={setConfirmPassword}
-                      onFocus={() => handleFocus('confirm')}
-                      onBlur={handleBlur}
-                  />
-                </View>
+              {/* Confirm Password Input */}
+              <Input
+                placeholder="Confirm Password"
+                secureTextEntry={!isPasswordVisible}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                isFocused={focusedInput === 'confirm'}
+                onFocus={() => setFocusedInput('confirm')}
+                onBlur={() => setFocusedInput(null)}
+                icon={<Ionicons name="shield-checkmark-outline" size={20} color="#94A3B8" />}
+              />
             </View>
 
-            {/* Signup Button */}
-            <TouchableOpacity style={styles.button} onPress={handleRegister} activeOpacity={0.85}>
-              <Text style={styles.buttonText}>Sign Up</Text>
-              <Ionicons name="chevron-forward" size={18} color="#FFF" style={{marginLeft: 6}} />
-            </TouchableOpacity>
+            <Button title="Sign Up" onPress={handleRegister} />
 
-            {/* Link back to Login */}
-            <View style={styles.signupContainer}>
-              <Text style={styles.newUserText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.push("/screens/LoginScreen")}> 
-                <Text style={styles.signupText}>Login</Text>
+            <View className="flex-row justify-center mt-6">
+              <Text className="text-slate-400 text-sm">Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.push("/screens/LoginScreen")}>
+                <Text className="text-orange-500 font-extrabold text-sm">Login</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -173,40 +150,5 @@ const RegisterScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  topCurve: {
-    position: 'absolute',
-    top: -width * 0.9, 
-    alignSelf: 'center',
-    width: width * 1.8,
-    height: width * 1.7,
-    borderRadius: width * 1.2,
-    backgroundColor: '#FFD700',
-    zIndex: -1,
-  },
-  scrollContainer: { flexGrow: 1, paddingTop: height * 0.09 },
-  inner: { flex: 1, paddingHorizontal: 32, paddingBottom: 40 },
-  backButton: { position: 'absolute', left: -15, top: -31, padding: 10, zIndex: 10 },
-  textContainer: { marginBottom: 20, alignItems: 'center' },
-  headerBox: { height: 120, justifyContent: 'center', alignItems: 'center', width: '100%' },
-  header: { fontSize: 28, fontWeight: "900", color: "#0F172A", textAlign: 'center', lineHeight: 34 },
-  brandName: { color: "#1E293B" },
-  accentBar: { width: 35, height: 4, backgroundColor: '#1E293B', borderRadius: 2, marginTop: 8 },
-  subtitle: { fontSize: 14, color: "#64748B", fontWeight: "600", textAlign: 'center', marginTop: 10, marginBottom: 41 },
-  formGroup: { marginBottom: 12 },
-  inputContainer: { flexDirection: "row", alignItems: "center", borderWidth: 1.5, borderColor: "#F1F5F9", borderRadius: 18, backgroundColor: "#F8FAFC", paddingHorizontal: 16, height: 58, marginBottom: 12 },
-  icon: { marginRight: 10 },
-  focusedBorder: { borderColor: "#1E293B", backgroundColor: "#FFFFFF", borderWidth: 2 },
-  countryCodeBox: { backgroundColor: "#FFD700", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginRight: 10 },
-  countryCode: { fontSize: 14, fontWeight: "800", color: "#1E293B" },
-  input: { flex: 1, fontSize: 15, color: "#0F172A", fontWeight: "600" },
-  button: { backgroundColor: "#1E293B", paddingVertical: 16, borderRadius: 20, alignItems: "center", justifyContent: "center", flexDirection: 'row' },
-  buttonText: { color: "#FFF", fontSize: 17, fontWeight: "800" },
-  signupContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 22 },
-  newUserText: { color: "#94A3B8", fontSize: 14 },
-  signupText: { color: "#F97316", fontWeight: "800", fontSize: 14 },
-});
 
 export default RegisterScreen;

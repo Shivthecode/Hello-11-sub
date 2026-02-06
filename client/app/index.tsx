@@ -1,17 +1,18 @@
 /* app/index.tsx */
 import React, { useState, useRef } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  Image, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  Dimensions, 
-  StatusBar, 
-  Animated 
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  Animated,
+  FlatList
 } from 'react-native';
-import { useRouter } from "expo-router"; 
+import { useRouter } from "expo-router";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
 const { width } = Dimensions.get('window');
 
@@ -23,16 +24,16 @@ const SLIDE_DATA = [
 
 const Start = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const flatListRef = useRef(null);
-  const router = useRouter(); 
-  
+  const flatListRef = useRef<FlatList>(null);
+  const router = useRouter();
+
   const scrollX = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(0)).current; 
-  const fadeAnim = useRef(new Animated.Value(1)).current;  
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    { 
+    {
       useNativeDriver: false,
       listener: (event: any) => {
         const currentIndex = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -59,21 +60,21 @@ const Start = () => {
           useNativeDriver: true,
         })
       ]).start(() => {
-        router.push("/screens/LoginScreen"); 
+        router.push("/screens/LoginScreen");
       });
     }
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar style="dark" />
       <View style={styles.yellowBackground}>
         <SafeAreaView style={styles.safeArea}>
           <Animated.View style={[styles.imageContainer, { opacity: fadeAnim, transform: [{ translateX: slideAnim }] }]}>
-             <View style={styles.logoWrapper}>
-              <Image 
+            <View style={styles.logoWrapper}>
+              <Image
                 //ya logo ka liya hai
-                source={require('../assets/images/imgss.jpeg')} 
+                source={require('../assets/images/imgss.jpeg')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
@@ -81,7 +82,7 @@ const Start = () => {
           </Animated.View>
 
           <Animated.View style={[
-            styles.bottomSheet, 
+            styles.bottomSheet,
             { opacity: fadeAnim, transform: [{ translateX: slideAnim }] }
           ]}>
             <Animated.FlatList
@@ -108,7 +109,7 @@ const Start = () => {
                 ))}
               </View>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={handleNext}
                 activeOpacity={0.8}
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
   textSlide: { width: width, paddingHorizontal: 40, alignItems: 'center' },
   title: { fontSize: 30, fontWeight: '900', color: '#1E293B', textAlign: 'center', marginBottom: 12 },
   subTitle: { fontSize: 16, color: '#64748B', textAlign: 'center', lineHeight: 24 },
-  footer: { paddingHorizontal: 40, paddingBottom: 40, alignItems: 'center' },
+  footer: { paddingHorizontal: 40, paddingBottom: 90, alignItems: 'center' },
   paginationContainer: { flexDirection: 'row', marginBottom: 25 },
   dot: { height: 8, width: 8, borderRadius: 4, backgroundColor: '#E2E8F0', marginHorizontal: 5 },
   activeDot: { width: 24, backgroundColor: '#FFD700' },

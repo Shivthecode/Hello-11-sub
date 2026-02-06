@@ -1,124 +1,109 @@
-
 import React, { useState, useCallback } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
-  StatusBar,
-  Dimensions,
   ScrollView,
 } from "react-native";
-import { useRouter, Stack } from "expo-router"; 
+import { useRouter, Stack } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
-
-const { width, height } = Dimensions.get('window');
+import { StatusBar } from 'expo-status-bar';
+import Input from "../../components/Input";
+import Button from "../../components/Button";
 
 const LoginScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const router = useRouter(); 
-
-  const handleFocus = useCallback((id: string) => setFocusedInput(id), []);
-  const handleBlur = useCallback(() => setFocusedInput(null), []);
+  const router = useRouter();
 
   const handleLogin = () => {
-    // Basic validation
     if (!phoneNumber || !password) {
       Alert.alert("Error", "Please enter both mobile number and password.");
       return;
     }
-    
-   
-    router.push("/screens/HomeScreen"); 
+    router.push("/screens/HomeScreen");
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-      
+      <StatusBar style="dark" translucent backgroundColor="transparent" />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+        className="flex-1"
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
+        <ScrollView
+          contentContainerClassName="flex-grow pt-[12vh]"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.topCurve} />
+          {/* Top Yellow Curve - Responsive */}
+          <View className="absolute -top-[62%] self-center w-[170%] aspect-square rounded-full bg-[#FFD700] -z-10" />
 
-          <View style={styles.inner}>
-            <View style={styles.textContainer}>
-              <Text style={styles.header}>Welcome to{"\n"}<Text style={styles.brandName}>Hello 11</Text></Text>
-              <View style={styles.accentBar} />
-              <Text style={styles.subtitle}>Login to continue your premium journey</Text>
+          <View className="flex-1 px-8 pb-10">
+            <View className="mb-8 items-center mt-3">
+              <Text className="text-3xl font-black text-slate-800 text-center leading-10">
+                Welcome to{"\n"}<Text className="text-slate-800">Hello 11</Text>
+              </Text>
+              <View className="w-9 h-1 bg-slate-800 rounded-full my-3" />
+              <Text className="text-sm text-slate-800 font-medium text-center">Login to continue your premium journey</Text>
             </View>
 
-            <View style={styles.formGroup}>
-                <View style={[styles.inputContainer, focusedInput === 'phone' && styles.focusedBorder]}>
-                  <View style={styles.countryCodeBox}>
-                      <Text style={styles.countryCode}>+91</Text>
+            <View className="mb-3 mt-[5vh]">
+              <Input
+                placeholder="Mobile Number"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                maxLength={10}
+                isFocused={focusedInput === 'phone'}
+                onFocus={() => setFocusedInput('phone')}
+                onBlur={() => setFocusedInput(null)}
+                icon={
+                  <View className="bg-[#FFD700] px-2.5 py-1.5 rounded-lg">
+                    <Text className="text-sm font-extrabold text-slate-800">+91</Text>
                   </View>
-                  <TextInput
-                      style={styles.input}
-                      placeholder="Mobile Number"
-                      placeholderTextColor="#94A3B8"
-                      keyboardType="phone-pad"
-                      value={phoneNumber}
-                      onChangeText={setPhoneNumber}
-                      maxLength={10}
-                      onFocus={() => handleFocus('phone')}
-                      onBlur={handleBlur}
-                  />
-                </View>
+                }
+              />
 
-                <View style={[styles.inputContainer, focusedInput === 'password' && styles.focusedBorder]}>
-                  <TextInput
-                      style={styles.input}
-                      placeholder="Security Password"
-                      placeholderTextColor="#94A3B8"
-                      secureTextEntry={!isPasswordVisible}
-                      value={password}
-                      onChangeText={setPassword}
-                      onFocus={() => handleFocus('password')}
-                      onBlur={handleBlur}
+              <Input
+                placeholder="Security Password"
+                secureTextEntry={!isPasswordVisible}
+                value={password}
+                onChangeText={setPassword}
+                isFocused={focusedInput === 'password'}
+                onFocus={() => setFocusedInput('password')}
+                onBlur={() => setFocusedInput(null)}
+                rightIcon={
+                  <Ionicons
+                    name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color={focusedInput === 'password' ? "#1E293B" : "#94A3B8"}
                   />
-                  <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                    <Ionicons 
-                      name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} 
-                      size={20} 
-                      color={focusedInput === 'password' ? "#1E293B" : "#94A3B8"} 
-                    />
-                  </TouchableOpacity>
-                </View>
+                }
+                onRightIconPress={() => setIsPasswordVisible(!isPasswordVisible)}
+              />
 
-                <TouchableOpacity 
-                  style={styles.forgetPasswordContainer}
-                  onPress={() => Alert.alert("Security", "Link sent.")}
-                >
-                  <Text style={styles.forgetPasswordText}>Forgot Password?</Text>
-                </TouchableOpacity>
+              <TouchableOpacity
+                className="self-end mb-4"
+                onPress={() => Alert.alert("Security", "Link sent.")}
+              >
+                <Text className="text-orange-500 font-bold text-xs">Forgot Password?</Text>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin} activeOpacity={0.85}>
-              <Text style={styles.buttonText}>Continue</Text>
-              <Ionicons name="chevron-forward" size={18} color="#FFF" style={{marginLeft: 6}} />
-            </TouchableOpacity>
+            <Button title="Continue" onPress={handleLogin} />
 
-            <View style={styles.signupContainer}>
-              <Text style={styles.newUserText}>New to Hello 11? </Text>
-              <TouchableOpacity 
-                onPress={() => router.push("/screens/registerScreen")}
-              > 
-                <Text style={styles.signupText}>Create Account</Text>
+            <View className="flex-row justify-center mt-6">
+              <Text className="text-slate-400 text-sm">New to Hello 11? </Text>
+              <TouchableOpacity onPress={() => router.push("/screens/registerScreen")}>
+                <Text className="text-orange-500 font-extrabold text-sm">Create Account</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -127,67 +112,5 @@ const LoginScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  topCurve: {
-    position: 'absolute',
-    top: -width * 0.58, 
-    alignSelf: 'center',
-    width: width * 1.6,
-    height: width * 1.6,
-    borderRadius: width * 10,
-    backgroundColor: '#FFD700', 
-    zIndex: -1,
-  },
-  scrollContainer: { 
-    flexGrow: 1,
-    paddingTop: height * 0.14, 
-  },
-  inner: { 
-    flex: 1,
-    paddingHorizontal: 32, 
-    paddingBottom: 40,
-  },
-  textContainer: { 
-    marginBottom: 30, 
-    alignItems: 'center',
-    marginTop: 10, 
-  },
-  header: { fontSize: 30, fontWeight: "900", color: "#0F172A", textAlign: 'center', lineHeight: 38 },
-  brandName: { color: "#1E293B" },
-  accentBar: { width: 35, height: 4, backgroundColor: '#FFD700', borderRadius: 2, marginVertical: 10 },
-  subtitle: { fontSize: 14, color: "#64748B", fontWeight: "500", textAlign: 'center' },
-  formGroup: { marginBottom: 12 },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#F1F5F9",
-    borderRadius: 18,
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: 16,
-    height: 60,
-    marginBottom: 12,
-  },
-  focusedBorder: { borderColor: "#1E293B", backgroundColor: "#FFFFFF", borderWidth: 2 },
-  countryCodeBox: { backgroundColor: "#FFD700", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginRight: 10 },
-  countryCode: { fontSize: 14, fontWeight: "800", color: "#1E293B" },
-  input: { flex: 1, fontSize: 16, color: "#0F172A", fontWeight: "600" },
-  forgetPasswordContainer: { alignSelf: 'flex-end', marginBottom: 15 },
-  forgetPasswordText: { color: "#F97316", fontWeight: "700", fontSize: 12 },
-  button: {
-    backgroundColor: "#1E293B",
-    paddingVertical: 16,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: 'row',
-  },
-  buttonText: { color: "#FFF", fontSize: 17, fontWeight: "800" },
-  signupContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 25 },
-  newUserText: { color: "#94A3B8", fontSize: 14 },
-  signupText: { color: "#F97316", fontWeight: "800", fontSize: 14 },
-});
 
 export default LoginScreen;
