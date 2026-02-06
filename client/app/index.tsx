@@ -1,20 +1,22 @@
-/* app/index.tsx */
 import React, { useState, useRef } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   Image,
   TouchableOpacity,
   Dimensions,
   Animated,
-  FlatList
+  FlatList,
+  Platform
 } from 'react-native';
 import { useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+
+// Tablet detection (Common breakpoint: 768px)
+const isTablet = width > 768;
 
 const SLIDE_DATA = [
   { id: '1', title: 'Your Ultimate\nTravel Partner.', subTitle: 'Duri pata na chale. Travel anywhere\nwith comfort and ease.' },
@@ -37,9 +39,7 @@ const Start = () => {
       useNativeDriver: false,
       listener: (event: any) => {
         const currentIndex = Math.round(event.nativeEvent.contentOffset.x / width);
-        if (currentIndex !== activeIndex) {
-          setActiveIndex(currentIndex);
-        }
+        if (currentIndex !== activeIndex) setActiveIndex(currentIndex);
       }
     }
   );
@@ -49,16 +49,8 @@ const Start = () => {
       flatListRef.current?.scrollToIndex({ index: activeIndex + 1, animated: true });
     } else {
       Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: -width * 0.1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        })
+        Animated.timing(slideAnim, { toValue: -width * 0.1, duration: 250, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true })
       ]).start(() => {
         router.push("/screens/LoginScreen");
       });
@@ -66,103 +58,86 @@ const Start = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#FFD700]">
       <StatusBar style="dark" />
-      <View style={styles.yellowBackground}>
-        <SafeAreaView style={styles.safeArea}>
-          <Animated.View style={[styles.imageContainer, { opacity: fadeAnim, transform: [{ translateX: slideAnim }] }]}>
-            <View style={styles.logoWrapper}>
-              <Image
-                //ya logo ka liya hai
-                source={require('../assets/images/imgss.jpeg')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-          </Animated.View>
-
-          <Animated.View style={[
-            styles.bottomSheet,
-            { opacity: fadeAnim, transform: [{ translateX: slideAnim }] }
-          ]}>
-            <Animated.FlatList
-              ref={flatListRef}
-              data={SLIDE_DATA}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.textSlide}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.subTitle}>{item.subTitle}</Text>
-                </View>
-              )}
+      <SafeAreaView className="flex-1">
+        
+        {/* Upper Section: Logo Image Container */}
+        <Animated.View 
+          style={{ opacity: fadeAnim, transform: [{ translateX: slideAnim }] }}
+          className="flex-[1.3] justify-center items-center px-6"
+        >
+          <View 
+            style={{ 
+              width: isTablet ? width * 0.45 : width * 0.65, 
+              aspectRatio: 1 
+            }}
+            className="bg-white rounded-full justify-center items-center overflow-hidden shadow-2xl border-4 border-white/30"
+          >
+            <Image
+              source={require('../assets/images/imgss.jpeg')}
+              className="w-full h-full"
+              resizeMode="cover"
             />
+          </View>
+        </Animated.View>
 
-            <View style={styles.footer}>
-              <View style={styles.paginationContainer}>
-                {SLIDE_DATA.map((_, index) => (
-                  <View key={index} style={[styles.dot, activeIndex === index && styles.activeDot]} />
-                ))}
-              </View>
-
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleNext}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.buttonText}>
-                  {activeIndex === SLIDE_DATA.length - 1 ? "Get started" : "Next"}
+        {/* Bottom Section: Interactive Sheet */}
+        <Animated.View 
+          style={{ opacity: fadeAnim, transform: [{ translateX: slideAnim }] }}
+          className="flex-1 bg-white rounded-t-[50px] pt-10 md:pt-16 shadow-inner"
+        >
+          <Animated.FlatList
+            ref={flatListRef}
+            data={SLIDE_DATA}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={{ width: width }} className="px-10 items-center justify-start">
+                <Text className="text-slate-900 text-3xl md:text-5xl font-black text-center leading-tight">
+                  {item.title}
                 </Text>
-              </TouchableOpacity>
+                <Text className="text-slate-500 text-base md:text-xl text-center leading-6 mt-4 md:mt-6 max-w-[85%] md:max-w-[70%]">
+                  {item.subTitle}
+                </Text>
+              </View>
+            )}
+          />
+
+          {/* Footer: Pagination & Button */}
+          <View className={`px-10 items-center ${isTablet ? 'pb-20' : 'pb-12'}`}>
+            {/* Custom Pagination Dots */}
+            <View className="flex-row mb-10">
+              {SLIDE_DATA.map((_, index) => (
+                <View 
+                  key={index} 
+                  className={`h-2 rounded-full mx-1 transition-all duration-300 ${
+                    activeIndex === index ? 'w-8 bg-[#FFD700]' : 'w-2 bg-slate-200'
+                  }`} 
+                />
+              ))}
             </View>
-          </Animated.View>
-        </SafeAreaView>
-      </View>
+
+            {/* Primary Action Button */}
+            <TouchableOpacity
+              onPress={handleNext}
+              activeOpacity={0.9}
+              className="bg-slate-900 w-full max-w-md py-5 rounded-full items-center shadow-lg"
+            >
+              <Text className="text-white text-lg md:text-xl font-bold">
+                {activeIndex === SLIDE_DATA.length - 1 ? "Get started" : "Next"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+
+      </SafeAreaView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFD700' },
-  yellowBackground: { flex: 1 },
-  safeArea: { flex: 1 },
-  imageContainer: { flex: 1.4, justifyContent: 'center', alignItems: 'center' },
-  logoWrapper: {
-    width: width * 0.6,
-    height: width * 0.6,
-    backgroundColor: '#FFF',
-    borderRadius: (width * 0.6) / 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  logoImage: { width: '101%', height: '101%' },
-  bottomSheet: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-    paddingTop: 35,
-  },
-  textSlide: { width: width, paddingHorizontal: 40, alignItems: 'center' },
-  title: { fontSize: 30, fontWeight: '900', color: '#1E293B', textAlign: 'center', marginBottom: 12 },
-  subTitle: { fontSize: 16, color: '#64748B', textAlign: 'center', lineHeight: 24 },
-  footer: { paddingHorizontal: 40, paddingBottom: 90, alignItems: 'center' },
-  paginationContainer: { flexDirection: 'row', marginBottom: 25 },
-  dot: { height: 8, width: 8, borderRadius: 4, backgroundColor: '#E2E8F0', marginHorizontal: 5 },
-  activeDot: { width: 24, backgroundColor: '#FFD700' },
-  primaryButton: {
-    backgroundColor: '#1E293B',
-    width: '100%',
-    paddingVertical: 18,
-    borderRadius: 100,
-    alignItems: 'center',
-  },
-  buttonText: { color: '#FFF', fontSize: 18, fontWeight: '700' },
-});
 
 export default Start;

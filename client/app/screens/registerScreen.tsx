@@ -7,12 +7,16 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+
+const { width, height } = Dimensions.get('window');
+const isTablet = width > 768;
 
 const RegisterScreen = () => {
   const [name, setName] = useState("");
@@ -32,13 +36,8 @@ const RegisterScreen = () => {
       Alert.alert("Error", "Passwords do not match!");
       return;
     }
-
     Alert.alert("Success", `Welcome ${name}! Account created successfully!`);
-
-    router.push({
-      pathname: "/screens/HomeScreen",
-      params: { userName: name }
-    });
+    router.push({ pathname: "/screens/HomeScreen", params: { userName: name } });
   };
 
   return (
@@ -46,102 +45,120 @@ const RegisterScreen = () => {
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar style="dark" translucent backgroundColor="transparent" />
 
+      {/* --- Responsive Yellow Background Section --- */}
+      <View 
+        style={{ 
+          height: isTablet ? height * 0.45 : height * 0.38, 
+          width: width * 2, 
+          left: -width * 0.5,
+          borderBottomLeftRadius: width,
+          borderBottomRightRadius: width,
+          position: 'absolute',
+          top: 0,
+        }} 
+        className="bg-[#FFD700] shadow-sm"
+      />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
       >
         <ScrollView
-          contentContainerClassName="flex-grow pt-[16vh]"
+          contentContainerClassName="flex-grow pt-10"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Yellow Design Section */}
-          <View className="absolute -top-[105%] self-center w-[180%] aspect-square rounded-[120%] bg-[#FFD700] -z-10" />
+          {/* Back Button - Positioned over yellow */}
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            className="ml-6 mt-2 bg-white/40 self-start p-2 rounded-full active:bg-white/60"
+          >
+            <Ionicons name="arrow-back" size={24} color="#1E293B" />
+          </TouchableOpacity>
 
-          <View className="flex-1 px-8 pb-10">
-            <View className="mb-5 items-center relative">
-              <TouchableOpacity onPress={() => router.back()} className="absolute left-[-15px] -top-16 p-2.5 z-10">
-                <Ionicons name="arrow-back" size={24} color="#1E293B" />
-              </TouchableOpacity>
+          <View className={`flex-1 px-8 ${isTablet ? 'max-w-2xl self-center w-full' : ''}`}>
+            
+            {/* Header Content - Now clearly on top of the yellow section */}
+            <View className="mb-8 items-center mt-4">
+              <Text className="text-[32px] md:text-5xl font-black text-slate-900 text-center leading-tight">
+                Create{"\n"}<Text className="text-slate-800">New Account</Text>
+              </Text>
+              <View className="w-12 h-1.5 bg-slate-900 rounded-full mt-3" />
+              <Text className="text-base md:text-lg text-slate-700 font-semibold text-center mt-4 opacity-90">
+                Join Hello 11 for a premium experience
+              </Text>
+            </View>
 
-              <View className="h-[120px] justify-center items-center w-full">
-                <Text className="text-[28px] font-black text-slate-900 text-center leading-8">
-                  Create{"\n"}<Text className="text-slate-800">New Account</Text>
-                </Text>
-                <View className="w-9 h-1 bg-slate-800 rounded-full mt-2" />
+            {/* Registration Form Card - Overlaps slightly with yellow */}
+            <View className="bg-white p-6 md:p-10 rounded-[40px] shadow-2xl shadow-slate-300 border border-slate-50">
+              <View className="space-y-4">
+                <Input
+                  placeholder="Full Name"
+                  value={name}
+                  onChangeText={setName}
+                  isFocused={focusedInput === 'name'}
+                  onFocus={() => setFocusedInput('name')}
+                  onBlur={() => setFocusedInput(null)}
+                  icon={<Ionicons name="person-outline" size={20} color={focusedInput === 'name' ? "#1E293B" : "#94A3B8"} />}
+                />
+
+                <Input
+                  placeholder="Mobile Number"
+                  keyboardType="phone-pad"
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  maxLength={10}
+                  isFocused={focusedInput === 'phone'}
+                  onFocus={() => setFocusedInput('phone')}
+                  onBlur={() => setFocusedInput(null)}
+                  icon={
+                    <View className="bg-[#FFD700] px-2.5 py-1 rounded-md">
+                      <Text className="text-xs font-black text-slate-800">+91</Text>
+                    </View>
+                  }
+                />
+
+                <Input
+                  placeholder="Create Password"
+                  secureTextEntry={!isPasswordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                  isFocused={focusedInput === 'password'}
+                  onFocus={() => setFocusedInput('password')}
+                  onBlur={() => setFocusedInput(null)}
+                  icon={<Ionicons name="lock-closed-outline" size={20} color={focusedInput === 'password' ? "#1E293B" : "#94A3B8"} />}
+                  rightIcon={
+                    <Ionicons
+                      name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color="#94A3B8"
+                    />
+                  }
+                  onRightIconPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                />
+
+                <Input
+                  placeholder="Confirm Password"
+                  secureTextEntry={!isPasswordVisible}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  isFocused={focusedInput === 'confirm'}
+                  onFocus={() => setFocusedInput('confirm')}
+                  onBlur={() => setFocusedInput(null)}
+                  icon={<Ionicons name="shield-checkmark-outline" size={20} color={focusedInput === 'confirm' ? "#1E293B" : "#94A3B8"} />}
+                />
               </View>
 
-              <Text className="text-sm text-slate-500 font-semibold text-center mt-2 mb-10">Join Hello 11 for a premium experience</Text>
+              <View className="mt-8">
+                <Button title="Sign Up" onPress={handleRegister} />
+              </View>
             </View>
 
-            <View className="mb-3">
-              {/* Full Name Input */}
-              <Input
-                placeholder="Full Name"
-                value={name}
-                onChangeText={setName}
-                isFocused={focusedInput === 'name'}
-                onFocus={() => setFocusedInput('name')}
-                onBlur={() => setFocusedInput(null)}
-                icon={<Ionicons name="person-outline" size={20} color="#94A3B8" />}
-              />
-
-              {/* Mobile Number Input */}
-              <Input
-                placeholder="Mobile Number"
-                keyboardType="phone-pad"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                maxLength={10}
-                isFocused={focusedInput === 'phone'}
-                onFocus={() => setFocusedInput('phone')}
-                onBlur={() => setFocusedInput(null)}
-                icon={
-                  <View className="bg-[#FFD700] px-2.5 py-1.5 rounded-lg">
-                    <Text className="text-sm font-extrabold text-slate-800">+91</Text>
-                  </View>
-                }
-              />
-
-              {/* Password Input */}
-              <Input
-                placeholder="Create Password"
-                secureTextEntry={!isPasswordVisible}
-                value={password}
-                onChangeText={setPassword}
-                isFocused={focusedInput === 'password'}
-                onFocus={() => setFocusedInput('password')}
-                onBlur={() => setFocusedInput(null)}
-                icon={<Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />}
-                rightIcon={
-                  <Ionicons
-                    name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color={focusedInput === 'password' ? "#1E293B" : "#94A3B8"}
-                  />
-                }
-                onRightIconPress={() => setIsPasswordVisible(!isPasswordVisible)}
-              />
-
-              {/* Confirm Password Input */}
-              <Input
-                placeholder="Confirm Password"
-                secureTextEntry={!isPasswordVisible}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                isFocused={focusedInput === 'confirm'}
-                onFocus={() => setFocusedInput('confirm')}
-                onBlur={() => setFocusedInput(null)}
-                icon={<Ionicons name="shield-checkmark-outline" size={20} color="#94A3B8" />}
-              />
-            </View>
-
-            <Button title="Sign Up" onPress={handleRegister} />
-
-            <View className="flex-row justify-center mt-6">
-              <Text className="text-slate-400 text-sm">Already have an account? </Text>
+            {/* Footer Navigation */}
+            <View className="flex-row justify-center mt-8 pb-12">
+              <Text className="text-slate-500 text-sm md:text-base font-medium">Already have an account? </Text>
               <TouchableOpacity onPress={() => router.push("/screens/LoginScreen")}>
-                <Text className="text-orange-500 font-extrabold text-sm">Login</Text>
+                <Text className="text-slate-900 font-black text-sm md:text-base border-b-2 border-[#FFD700]">Login</Text>
               </TouchableOpacity>
             </View>
           </View>
